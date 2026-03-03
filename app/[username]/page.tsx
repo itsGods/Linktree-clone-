@@ -72,9 +72,9 @@ export default async function UserProfilePage({
           </div>
         </div>
 
-        <div className="w-full space-y-4 flex flex-col items-center">
-          {links.map((link) => (
-            <LinkRenderer key={link.id} link={link} />
+        <div className="w-full space-y-4 flex flex-col items-center px-4">
+          {links.map((link, index) => (
+            <LinkRenderer key={link.id} link={link} index={index} />
           ))}
           
           {links.length === 0 && (

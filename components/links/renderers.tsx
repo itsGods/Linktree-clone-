@@ -86,7 +86,7 @@ const linkRenderers: Record<string, React.ComponentType<{ link: Link }>> = {
 
 // --- Main Component ---
 
-export function LinkRenderer({ link, style }: { link: Link; style?: React.CSSProperties }) {
+export function LinkRenderer({ link, style, index = 0 }: { link: Link; style?: React.CSSProperties; index?: number }) {
   const Renderer = linkRenderers[link.type] || ClassicLink
 
   const getAnimation = () => {
@@ -104,7 +104,9 @@ export function LinkRenderer({ link, style }: { link: Link; style?: React.CSSPro
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.3 }}
       whileHover={link.is_highlighted ? {} : { scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className="w-full max-w-md mb-4"
       style={style}
     >

@@ -2,6 +2,10 @@ import { createClient } from "@/lib/supabase/server"
 import { AddLinkModal } from "@/components/links/add-link-modal"
 import { LinkEditor } from "@/components/links/link-editor"
 import { getLinksByProfileId } from "@/server/queries/links"
+import { MobilePreview } from "@/components/preview/mobile-preview"
+import { SharePanel } from "@/components/dashboard/share-panel"
+import { StoreInitializer } from "@/components/store-initializer"
+import { MobilePreviewToggle } from "@/components/preview/mobile-preview-toggle"
 
 export default async function LinksPage() {
   const supabase = await createClient()
@@ -9,32 +13,44 @@ export default async function LinksPage() {
   
   if (!user) return null
 
+  // Fetch profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single()
+
   const links = await getLinksByProfileId(user.id)
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] gap-8">
-      {/* Editor Column */}
-      <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Links</h1>
-        </div>
-        
-        <AddLinkModal />
-        
-        <LinkEditor initialLinks={links} />
+    <div className="flex flex-col h-[calc(100vh-4rem)] overflow-hidden bg-gray-50/50">
+      <StoreInitializer links={links} />
+      
+      {/* Share Panel */}
+      <div className="p-6 pb-0 max-w-7xl mx-auto w-full">
+        <SharePanel username={profile?.username || user.email?.split('@')[0] || "user"} />
       </div>
 
-      {/* Preview Column */}
-      <div className="hidden lg:flex w-[400px] flex-col items-center justify-center bg-gray-100 rounded-3xl border-8 border-gray-900 shadow-2xl overflow-hidden relative">
-        <div className="absolute top-0 w-40 h-6 bg-gray-900 rounded-b-xl z-10"></div>
-        <div className="w-full h-full bg-white overflow-y-auto no-scrollbar">
-          <iframe 
-            src={`/${user.id}`} // We'll need to map this to username or use a preview route
-            className="w-full h-full border-none"
-            title="Preview"
-          />
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-6 gap-8 max-w-7xl mx-auto w-full">
+        {/* Editor Column */}
+        <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 pb-20 scrollbar-hide">
+          <div className="flex items-center justify-between sticky top-0 bg-gray-50/95 backdrop-blur z-10 py-2">
+            <h1 className="text-2xl font-bold text-gray-900">Links</h1>
+            <AddLinkModal />
+          </div>
+          
+          <LinkEditor initialLinks={links} />
+        </div>
+
+        {/* Preview Column */}
+        <div className="hidden lg:flex w-[450px] flex-col items-center justify-center sticky top-6 h-full">
+          <div className="relative w-full h-full flex items-center justify-center">
+             <MobilePreview user={profile || { username: "user" }} />
+          </div>
         </div>
       </div>
+      
+      <MobilePreviewToggle user={profile || { username: "user" }} />
     </div>
   )
 }
