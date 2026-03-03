@@ -39,7 +39,7 @@ const seoFormSchema = z.object({
   seo_title: z.string().max(60, "Title must be less than 60 characters").optional(),
   seo_description: z.string().max(160, "Description must be less than 160 characters").optional(),
   og_image_url: z.string().optional(),
-  og_template_style: z.enum(['default', 'minimal', 'dark', 'gradient', 'glass']).default('default'),
+  og_template_style: z.enum(['default', 'minimal', 'dark', 'gradient', 'glass']),
 })
 
 type SeoFormValues = z.infer<typeof seoFormSchema>
