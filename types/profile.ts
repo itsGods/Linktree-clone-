@@ -1,3 +1,5 @@
+import { Theme } from './theme'
+
 export interface Profile {
   id: string
   username: string
@@ -8,5 +10,7 @@ export interface Profile {
   seo_description: string | null
   og_image_url: string | null
   og_template_style: 'default' | 'minimal' | 'dark' | 'gradient' | 'glass'
+  custom_appearance: Partial<Theme> | null
+  onboarding_complete: boolean
   updated_at: string
 }

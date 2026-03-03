@@ -40,10 +40,43 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes logic
-  if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/onboarding')) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Check onboarding status
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_complete')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && !profile.onboarding_complete) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/onboarding/username'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  if (request.nextUrl.pathname.startsWith('/onboarding')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_complete')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && profile.onboarding_complete) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin'
       return NextResponse.redirect(url)
     }
   }
