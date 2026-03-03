@@ -85,36 +85,41 @@ export default function OnboardingPage() {
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsLoading(true)
-    const supabase = createClient()
-    
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      toast.error("No user found")
+    try {
+      const supabase = createClient()
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast.error("No user found")
+        setIsLoading(false)
+        return
+      }
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          username: values.username,
+          display_name: values.display_name,
+          bio: values.bio,
+          avatar_url: values.avatar_url,
+          updated_at: new Date().toISOString(),
+        })
+
+      if (error) {
+        toast.error(error.message)
+        setIsLoading(false)
+        return
+      }
+
+      toast.success("Profile created!")
+      router.push("/admin")
+      router.refresh()
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.")
       setIsLoading(false)
-      return
     }
-
-    const { error } = await supabase
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        username: values.username,
-        display_name: values.display_name,
-        bio: values.bio,
-        avatar_url: values.avatar_url,
-        updated_at: new Date().toISOString(),
-      })
-
-    if (error) {
-      toast.error(error.message)
-      setIsLoading(false)
-      return
-    }
-
-    toast.success("Profile created!")
-    router.push("/admin")
-    router.refresh()
   }
 
   const nextStep = () => {
@@ -206,8 +211,11 @@ export default function OnboardingPage() {
                             .from('avatars')
                             .getPublicUrl(filePath)
                           
-                          setAvatarUrl(publicUrl)
-                          form.setValue("avatar_url", publicUrl)
+                          // Add a timestamp to bust cache
+                          const publicUrlWithTimestamp = `${publicUrl}?t=${new Date().getTime()}`
+                          
+                          setAvatarUrl(publicUrlWithTimestamp)
+                          form.setValue("avatar_url", publicUrlWithTimestamp)
                           toast.success('Avatar uploaded!')
                         }
                       }}

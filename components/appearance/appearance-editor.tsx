@@ -11,18 +11,22 @@ import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Theme } from "@/types/theme"
 
+import { ProfileEditor } from "@/components/appearance/profile-editor"
+import { Profile } from "@/types/profile"
+
 interface AppearanceEditorProps {
   initialTheme: Theme | null
   initialCustom: Partial<Theme> | null
+  initialProfile: Partial<Profile> | null
   systemThemes: Theme[]
 }
 
-export function AppearanceEditor({ initialTheme, initialCustom, systemThemes }: AppearanceEditorProps) {
+export function AppearanceEditor({ initialTheme, initialCustom, initialProfile, systemThemes }: AppearanceEditorProps) {
   const { init, save, isDirty } = useAppearanceStore()
 
   useEffect(() => {
-    init(initialTheme, initialCustom)
-  }, [initialTheme, initialCustom, init])
+    init(initialTheme, initialCustom, initialProfile)
+  }, [initialTheme, initialCustom, initialProfile, init])
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
@@ -37,6 +41,13 @@ export function AppearanceEditor({ initialTheme, initialCustom, systemThemes }: 
           </div>
 
           <div className="space-y-6">
+            <section>
+              <h2 className="text-lg font-semibold mb-4">Profile</h2>
+              <div className="bg-white rounded-lg border p-4">
+                <ProfileEditor />
+              </div>
+            </section>
+
             <section>
               <h2 className="text-lg font-semibold mb-4">Themes</h2>
               <ThemeGallery themes={systemThemes} />

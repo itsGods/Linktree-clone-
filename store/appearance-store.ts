@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Theme, ProfileAppearance } from '@/types/theme'
+import { Profile } from '@/types/profile'
 import { resolveTheme, DEFAULT_THEME } from '@/lib/theme/resolve-theme'
 import { updateProfileAppearance } from '@/server/actions/appearance'
 import { toast } from 'sonner'
@@ -11,11 +12,14 @@ interface AppearanceState {
   customAppearance: Partial<Theme>
   // The final resolved theme for preview
   previewTheme: Theme
+  // Profile details
+  profile: Partial<Profile> | null
   
   // Actions
-  init: (theme: Theme | null, custom: Partial<Theme> | null) => void
+  init: (theme: Theme | null, custom: Partial<Theme> | null, profile: Partial<Profile> | null) => void
   setTheme: (theme: Theme) => void
   updateCustom: (updates: Partial<Theme>) => void
+  updateProfile: (updates: Partial<Profile>) => void
   save: () => Promise<void>
   reset: () => void
   isDirty: boolean
@@ -25,13 +29,15 @@ export const useAppearanceStore = create<AppearanceState>((set, get) => ({
   selectedTheme: null,
   customAppearance: {},
   previewTheme: DEFAULT_THEME,
+  profile: null,
   isDirty: false,
 
-  init: (theme, custom) => {
+  init: (theme, custom, profile) => {
     set({
       selectedTheme: theme,
       customAppearance: custom || {},
       previewTheme: resolveTheme(theme, custom || {}),
+      profile: profile || {},
       isDirty: false
     })
   },
@@ -60,10 +66,18 @@ export const useAppearanceStore = create<AppearanceState>((set, get) => ({
     })
   },
 
+  updateProfile: (updates) => {
+    const currentProfile = get().profile || {}
+    set({
+      profile: { ...currentProfile, ...updates },
+      isDirty: true
+    })
+  },
+
   save: async () => {
-    const { selectedTheme, customAppearance } = get()
+    const { selectedTheme, customAppearance, profile } = get()
     try {
-      await updateProfileAppearance(selectedTheme?.id || null, customAppearance)
+      await updateProfileAppearance(selectedTheme?.id || null, customAppearance, profile || undefined)
       set({ isDirty: false })
       toast.success("Appearance saved")
     } catch (error) {

@@ -4,10 +4,22 @@ import { headers } from "next/headers"
 import crypto from "crypto"
 
 // Initialize Supabase Admin Client for inserting events
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy initialization to prevent build errors
+let supabaseAdmin: ReturnType<typeof createClient> | null = null
+
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase environment variables")
+    }
+
+    supabaseAdmin = createClient(supabaseUrl, supabaseKey)
+  }
+  return supabaseAdmin
+}
 
 // Simple in-memory rate limiter (for demo purposes - use Redis in prod)
 const rateLimitMap = new Map<string, { count: number, lastReset: number }>()
@@ -100,7 +112,8 @@ export async function POST(req: NextRequest) {
     const ip_hash = crypto.createHash('sha256').update(ip + (process.env.IP_SALT || 'salt')).digest('hex')
 
     // 5. Insert into analytics_events
-    const { error } = await supabaseAdmin
+    const adminClient = getSupabaseAdmin()
+    const { error } = await adminClient
       .from('analytics_events')
       .insert({
         profile_id,
@@ -126,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     // 6. Increment link click count if applicable
     if (event_type === 'link_click' && link_id) {
-      await supabaseAdmin.rpc('increment_click_count', { link_id })
+      await adminClient.rpc('increment_click_count', { link_id })
     }
 
     return NextResponse.json({ success: true })

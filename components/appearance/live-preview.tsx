@@ -51,7 +51,7 @@ const PREVIEW_LINKS: Link[] = [
 ]
 
 export function LivePreview() {
-  const { previewTheme } = useAppearanceStore()
+  const { previewTheme, profile } = useAppearanceStore()
   const themeCSS = generateThemeCSS(previewTheme)
 
   return (
@@ -71,15 +71,15 @@ export function LivePreview() {
             {/* Profile Header */}
             <div className="flex flex-col items-center space-y-4 mb-8 text-center">
               <Avatar className={`h-24 w-24 border-2 border-white shadow-md ${previewTheme.avatar_shape === 'square' ? 'rounded-none' : previewTheme.avatar_shape === 'rounded' ? 'rounded-xl' : 'rounded-full'}`}>
-                <AvatarImage src="" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarImage src={profile?.avatar_url || ""} />
+                <AvatarFallback>{profile?.display_name?.[0] || "U"}</AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--title-color)' }}>
-                  @username
+                  {profile?.display_name || "@username"}
                 </h1>
                 <p className="text-sm mt-1" style={{ color: 'var(--bio-color)' }}>
-                  This is a preview of your bio.
+                  {profile?.bio || "This is a preview of your bio."}
                 </p>
               </div>
             </div>
