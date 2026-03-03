@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Type, Image, Video, Music, ShoppingBag, Mail, MapPin, Link as LinkIcon, LayoutTemplate } from "lucide-react"
+import { Plus, Type, Image as ImageIcon, Video, Music, ShoppingBag, Mail, MapPin, Link as LinkIcon, LayoutTemplate } from "lucide-react"
 import { toast } from "sonner"
 
 import {
@@ -19,7 +19,7 @@ const linkTypes: { type: LinkType; label: string; icon: React.ReactNode }[] = [
   { type: 'classic', label: 'Link', icon: <LinkIcon className="h-6 w-6" /> },
   { type: 'header', label: 'Header', icon: <Type className="h-6 w-6" /> },
   { type: 'text_block', label: 'Text Block', icon: <LayoutTemplate className="h-6 w-6" /> },
-  { type: 'image', label: 'Image', icon: <Image className="h-6 w-6" /> },
+  { type: 'image', label: 'Image', icon: <ImageIcon className="h-6 w-6" /> },
   { type: 'video', label: 'Video', icon: <Video className="h-6 w-6" /> },
   { type: 'music', label: 'Music', icon: <Music className="h-6 w-6" /> },
   { type: 'commerce', label: 'Commerce', icon: <ShoppingBag className="h-6 w-6" /> },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { Copy, ExternalLink, Share2, QrCode, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -11,13 +11,12 @@ interface SharePanelProps {
 
 export function SharePanel({ username }: SharePanelProps) {
   const [copied, setCopied] = useState(false)
-  const [origin, setOrigin] = useState("")
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setOrigin(window.location.origin)
-    }
-  }, [])
+  
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => ""
+  )
 
   const url = origin ? `${origin}/${username}` : `/${username}`
 

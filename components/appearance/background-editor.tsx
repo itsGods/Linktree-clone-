@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { Upload } from "lucide-react"
+import Image from "next/image"
 
 export function BackgroundEditor() {
   const { customAppearance, updateCustom } = useAppearanceStore()
@@ -145,10 +146,11 @@ export function BackgroundEditor() {
           
           {customAppearance.background_image_url && (
             <div className="relative aspect-video rounded-lg overflow-hidden border">
-              <img 
+              <Image 
                 src={customAppearance.background_image_url} 
                 alt="Background preview" 
-                className="object-cover w-full h-full"
+                fill
+                className="object-cover"
               />
               <Button 
                 variant="destructive" 

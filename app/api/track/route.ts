@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         utm_medium,
         utm_campaign,
         ip_hash
-      })
+      } as any)
 
     if (error) {
       console.error("Error inserting event:", error)
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
 
     // 6. Increment link click count if applicable
     if (event_type === 'link_click' && link_id) {
-      await adminClient.rpc('increment_click_count', { link_id })
+      await adminClient.rpc('increment_click_count', { link_id } as any)
     }
 
     return NextResponse.json({ success: true })

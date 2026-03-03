@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/server"
+import { Metadata, ResolvingMetadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getPublicLinksByUsername } from "@/server/queries/links"
+import { getProfileByUsername } from "@/server/queries/profile"
 import { LinkRenderer } from "@/components/links/renderers"
 import { resolveTheme, generateThemeCSS } from "@/lib/theme/resolve-theme"
 import { Theme } from "@/types/theme"
@@ -11,25 +12,57 @@ import { PageViewTracker } from "@/components/analytics/page-view-tracker"
 
 export const revalidate = 60 // Cache for 60 seconds
 
+interface Props {
+  params: Promise<{ username: string }>
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { username } = await params
+  const profile = await getProfileByUsername(username)
+
+  if (!profile) {
+    return {
+      title: "User not found",
+    }
+  }
+
+  const title = profile.seo_title || profile.display_name || `@${profile.username}`
+  const description = profile.seo_description || profile.bio || `Check out ${profile.display_name || profile.username}'s links`
+  
+  const ogImage = profile.og_image_url || `/api/og?username=${username}&style=${profile.og_template_style || 'default'}`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [ogImage],
+      type: 'profile',
+      username: profile.username,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+  }
+}
+
 export default async function UserProfilePage({
   params,
-}: {
-  params: Promise<{ username: string }>
-}) {
+}: Props) {
   const { username } = await params
-  const supabase = await createClient()
   
   // Parallel fetch
-  const [profileResponse, links] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("*, themes(*)")
-      .eq("username", username)
-      .single(),
+  const [profile, links] = await Promise.all([
+    getProfileByUsername(username),
     getPublicLinksByUsername(username)
   ])
-
-  const profile = profileResponse.data
 
   if (!profile) {
     notFound()
@@ -59,7 +92,7 @@ export default async function UserProfilePage({
           <Avatar 
             className={`h-24 w-24 border-2 border-white shadow-md ${theme.avatar_shape === 'square' ? 'rounded-none' : theme.avatar_shape === 'rounded' ? 'rounded-xl' : 'rounded-full'}`}
           >
-            <AvatarImage src={profile.avatar_url} alt={profile.username} />
+            <AvatarImage src={profile.avatar_url || undefined} alt={profile.username} />
             <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>

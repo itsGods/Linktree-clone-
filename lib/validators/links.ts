@@ -1,8 +1,8 @@
 import { z } from "zod"
 
 export const linkSchema = z.object({
-  title: z.string().min(1, "Title is required").optional(),
-  url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  title: z.string().min(1, "Title is required").nullable().optional(),
+  url: z.string().nullable().optional().or(z.literal("")),
   is_active: z.boolean().optional(),
   is_highlighted: z.boolean().optional(),
   highlight_animation: z.enum(['none', 'shake', 'pulse', 'bounce', 'glow']).optional(),

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { toast } from "sonner"
@@ -48,7 +48,10 @@ export default function OnboardingPage() {
     mode: "onChange",
   })
 
-  const username = form.watch("username")
+  const username = useWatch({
+    control: form.control,
+    name: "username",
+  })
   
   // Simple debounce implementation inside component for now or create a hook
   useEffect(() => {

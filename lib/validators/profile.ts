@@ -11,6 +11,10 @@ export const profileSchema = z.object({
   display_name: z.string().min(1, { message: "Display name is required" }).optional(),
   bio: z.string().max(80, { message: "Bio must be at most 80 characters" }).optional(),
   avatar_url: z.string().optional(),
+  seo_title: z.string().max(60, { message: "SEO Title must be at most 60 characters" }).optional(),
+  seo_description: z.string().max(160, { message: "SEO Description must be at most 160 characters" }).optional(),
+  og_image_url: z.string().optional(),
+  og_template_style: z.enum(['default', 'minimal', 'dark', 'gradient', 'glass']).optional(),
 })
 
 export type ProfileInput = z.infer<typeof profileSchema>
