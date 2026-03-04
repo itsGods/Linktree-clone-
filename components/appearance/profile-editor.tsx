@@ -46,7 +46,7 @@ export function ProfileEditor() {
       updateProfile({ avatar_url: publicUrlWithTimestamp })
       toast.success('Avatar uploaded!')
     } catch (error: any) {
-      toast.error('Error uploading avatar: ' + error.message)
+      toast.error(`Error uploading avatar: ${error.message || "Unknown error"}`)
     } finally {
       setIsUploading(false)
     }

@@ -69,9 +69,9 @@ export default function ProfilePage() {
 
       form.setValue("avatar_url", publicUrlWithTimestamp, { shouldDirty: true })
       toast.success("Image uploaded successfully")
-    } catch (error) {
-      console.error(error)
-      toast.error("Failed to upload image")
+    } catch (error: any) {
+      console.error("Upload error details:", error)
+      toast.error(`Failed to upload image: ${error.message || "Unknown error"}`)
     } finally {
       setUploading(false)
     }
