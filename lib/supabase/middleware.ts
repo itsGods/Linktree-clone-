@@ -79,6 +79,12 @@ export async function updateSession(request: NextRequest) {
       url.pathname = '/admin'
       return NextResponse.redirect(url)
     }
+
+    if (request.nextUrl.pathname === '/onboarding') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/onboarding/username'
+      return NextResponse.redirect(url)
+    }
   }
 
   // Redirect authenticated users away from auth pages

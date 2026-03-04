@@ -53,12 +53,11 @@ export default function ProfilePage() {
       if (!user) throw new Error("Unauthorized")
 
       const fileExt = file.name.split('.').pop()
-      const fileName = `avatar-${Date.now()}.${fileExt}`
-      const filePath = `${user.id}/${fileName}`
+      const filePath = `${user.id}/avatar.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file)
+        .upload(filePath, file, { upsert: true })
 
       if (uploadError) throw uploadError
 
@@ -66,7 +65,9 @@ export default function ProfilePage() {
         .from('avatars')
         .getPublicUrl(filePath)
 
-      form.setValue("avatar_url", publicUrl, { shouldDirty: true })
+      const publicUrlWithTimestamp = `${publicUrl}?t=${new Date().getTime()}`
+
+      form.setValue("avatar_url", publicUrlWithTimestamp, { shouldDirty: true })
       toast.success("Image uploaded successfully")
     } catch (error) {
       console.error(error)
