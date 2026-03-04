@@ -197,167 +197,165 @@ export function LinkCard({ link }: LinkCardProps) {
         ref={setNodeRef} 
         style={style} 
         className={cn(
-          "group relative flex items-start p-4 gap-4 bg-white transition-all duration-200",
-          "hover:shadow-lg hover:border-gray-300 border-gray-200 rounded-2xl",
+          "group relative flex flex-col bg-white transition duration-150",
+          "rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md",
           isDragging && "shadow-xl scale-[1.02] rotate-1 cursor-grabbing"
         )}
       >
-        {/* Drag Handle */}
-        <div 
-          {...attributes} 
-          {...listeners} 
-          className="mt-2 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-600 transition-colors p-1 rounded hover:bg-gray-100"
-        >
-          <GripVertical className="h-5 w-5" />
-        </div>
+        {/* Top Row: drag handle, icon, title, menu button */}
+        <div className="flex items-center gap-3 w-full">
+          {/* Drag Handle */}
+          <div 
+            {...attributes} 
+            {...listeners} 
+            className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <GripVertical className="h-5 w-5" />
+          </div>
 
-        {/* Content */}
-        <div className="flex-1 space-y-3 min-w-0">
-          
-          {/* Title & Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            {isEditingTitle ? (
-              <div className="flex items-center gap-2 w-full max-w-md">
-                <Input 
-                  ref={titleInputRef}
-                  value={title} 
-                  onChange={(e) => setTitle(e.target.value)} 
-                  onBlur={handleSaveTitle}
-                  onKeyDown={(e) => handleKeyDown(e, handleSaveTitle, () => {
-                    setTitle(link.title || "")
-                    setIsEditingTitle(false)
-                  })}
-                  className="h-8 font-semibold text-lg"
-                  autoFocus
+          {/* Icon */}
+          <label className="cursor-pointer group/thumb relative h-10 w-10 shrink-0 block transition-transform active:scale-95">
+            <input type="file" className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
+            {link.thumbnail_url ? (
+              <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-gray-200 group-hover/thumb:border-gray-400 transition-colors">
+                <Image 
+                  src={link.thumbnail_url} 
+                  alt="Thumbnail" 
+                  fill
+                  className="object-cover" 
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/10 transition-colors" />
               </div>
             ) : (
-              <div 
-                onClick={() => setIsEditingTitle(true)}
-                className="font-bold text-gray-900 text-lg cursor-pointer hover:bg-gray-50 px-2 -ml-2 rounded transition-colors truncate"
-              >
-                {link.title || "Untitled Link"}
+              <div className="h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-200 text-gray-400 group-hover/thumb:border-gray-400 group-hover/thumb:text-gray-600 transition-all">
+                <ImageIcon className="h-5 w-5" />
               </div>
+            )}
+          </label>
+
+          {/* Title & URL */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              {isEditingTitle ? (
+                <div className="flex items-center gap-2 w-full max-w-md">
+                  <Input 
+                    ref={titleInputRef}
+                    value={title} 
+                    onChange={(e) => setTitle(e.target.value)} 
+                    onBlur={handleSaveTitle}
+                    onKeyDown={(e) => handleKeyDown(e, handleSaveTitle, () => {
+                      setTitle(link.title || "")
+                      setIsEditingTitle(false)
+                    })}
+                    className="h-7 font-semibold text-base px-2"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div 
+                  onClick={() => setIsEditingTitle(true)}
+                  className="font-semibold text-gray-900 text-base cursor-pointer hover:bg-gray-50 px-1 -ml-1 rounded transition-colors truncate"
+                >
+                  {link.title || "Untitled Link"}
+                </div>
+              )}
+              {isSaving && <Loader2 className="h-3 w-3 animate-spin text-gray-400" />}
+            </div>
+
+            {/* URL Row */}
+            <div className="flex items-center gap-2 mt-0.5">
+              {isEditingUrl ? (
+                <div className="w-full max-w-md space-y-1">
+                  <Input 
+                    ref={urlInputRef}
+                    value={url} 
+                    onChange={(e) => {
+                      setUrl(e.target.value)
+                      if (urlError) setUrlError(null)
+                    }} 
+                    onBlur={handleSaveUrl}
+                    onKeyDown={(e) => handleKeyDown(e, handleSaveUrl, () => {
+                      setUrl(link.url || "")
+                      setIsEditingUrl(false)
+                      setUrlError(null)
+                    })}
+                    className={cn("h-6 text-sm px-2", urlError && "border-red-500 focus-visible:ring-red-500")}
+                    placeholder="https://example.com"
+                    autoFocus
+                  />
+                  {urlError && <p className="text-xs text-red-500">{urlError}</p>}
+                </div>
+              ) : (
+                <div 
+                  onClick={() => setIsEditingUrl(true)}
+                  className="text-sm text-gray-500 cursor-pointer hover:text-gray-900 hover:bg-gray-50 px-1 -ml-1 rounded transition-colors truncate max-w-full"
+                >
+                  {link.url || "https://"}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Menu Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-900 shrink-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => { setIsEditingTitle(true); setTimeout(() => titleInputRef.current?.focus(), 0) }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit Title
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { setIsEditingUrl(true); setTimeout(() => urlInputRef.current?.focus(), 0) }}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit URL
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate}>
+                <Copy className="mr-2 h-4 w-4" /> Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setScheduleOpen(true)}>
+                <Clock className="mr-2 h-4 w-4" /> Schedule
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setHighlightOpen(true)}>
+                <Star className="mr-2 h-4 w-4" /> Highlight
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={handleDelete}>
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Bottom Row */}
+        <div className="flex items-center justify-between mt-4">
+          {/* Left side: click count & badges */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+              <span className="w-2 h-2 rounded-full bg-green-500/20 border border-green-500/50"></span>
+              <span>{link.click_count} clicks</span>
+            </div>
+            
+            {isScheduled && (
+              <Badge variant="outline" className="text-[10px] gap-1 h-4 px-1.5 font-normal text-gray-500 border-gray-200">
+                <Clock className="h-2.5 w-2.5" />
+                Scheduled
+              </Badge>
             )}
             
-            {/* Saving Indicator */}
-            {isSaving && <Loader2 className="h-3 w-3 animate-spin text-gray-400" />}
-
-            <div className="flex items-center gap-2 ml-auto sm:ml-0">
-              {isScheduled && (
-                <Badge variant="outline" className="text-xs gap-1 h-5 px-1.5 font-normal text-gray-500 border-gray-200">
-                  <Clock className="h-3 w-3" />
-                  Scheduled
-                </Badge>
-              )}
-              
-              {link.is_highlighted && (
-                <Badge variant="default" className="text-xs gap-1 h-5 px-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200 shadow-none">
-                  <Star className="h-3 w-3 fill-current" />
-                  Highlighted
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          {/* URL */}
-          <div className="flex items-center gap-2">
-            {isEditingUrl ? (
-              <div className="w-full max-w-md space-y-1">
-                <Input 
-                  ref={urlInputRef}
-                  value={url} 
-                  onChange={(e) => {
-                    setUrl(e.target.value)
-                    if (urlError) setUrlError(null)
-                  }} 
-                  onBlur={handleSaveUrl}
-                  onKeyDown={(e) => handleKeyDown(e, handleSaveUrl, () => {
-                    setUrl(link.url || "")
-                    setIsEditingUrl(false)
-                    setUrlError(null)
-                  })}
-                  className={cn("h-8 text-sm", urlError && "border-red-500 focus-visible:ring-red-500")}
-                  placeholder="https://example.com"
-                  autoFocus
-                />
-                {urlError && <p className="text-xs text-red-500">{urlError}</p>}
-              </div>
-            ) : (
-              <div 
-                onClick={() => setIsEditingUrl(true)}
-                className="text-sm text-gray-500 cursor-pointer hover:text-gray-900 hover:bg-gray-50 px-2 -ml-2 rounded transition-colors truncate max-w-full"
-              >
-                {link.url || "https://"}
-              </div>
+            {link.is_highlighted && (
+              <Badge variant="default" className="text-[10px] gap-1 h-4 px-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200 shadow-none">
+                <Star className="h-2.5 w-2.5 fill-current" />
+                Highlighted
+              </Badge>
             )}
           </div>
 
-          {/* Metadata / Stats */}
-          <div className="flex items-center gap-4 pt-1">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-green-500/20 border border-green-500/50"></span>
-              <span className="text-gray-600">{link.click_count} clicks</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col items-end gap-3">
+          {/* Right side: toggle switch */}
           <Switch 
             checked={link.is_active} 
             onCheckedChange={handleToggleActive}
-            className="data-[state=checked]:bg-green-600"
+            className="data-[state=checked]:bg-green-600 h-5 w-9 [&_span]:h-4 [&_span]:w-4 [&_span]:data-[state=checked]:translate-x-4"
           />
-
-          <div className="flex items-center gap-2">
-            <label className="cursor-pointer group/thumb relative h-8 w-8 block transition-transform active:scale-95">
-              <input type="file" className="hidden" accept="image/*" onChange={handleThumbnailUpload} />
-              {link.thumbnail_url ? (
-                <div className="relative h-8 w-8 rounded-md overflow-hidden border border-gray-200 group-hover/thumb:border-gray-400 transition-colors">
-                  <Image 
-                    src={link.thumbnail_url} 
-                    alt="Thumbnail" 
-                    fill
-                    className="object-cover" 
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/10 transition-colors" />
-                </div>
-              ) : (
-                <div className="h-8 w-8 rounded-md bg-gray-50 flex items-center justify-center border border-gray-200 text-gray-400 group-hover/thumb:border-gray-400 group-hover/thumb:text-gray-600 transition-all">
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-              )}
-            </label>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-900">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => { setIsEditingTitle(true); setTimeout(() => titleInputRef.current?.focus(), 0) }}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit Title
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { setIsEditingUrl(true); setTimeout(() => urlInputRef.current?.focus(), 0) }}>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit URL
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDuplicate}>
-                  <Copy className="mr-2 h-4 w-4" /> Duplicate
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setScheduleOpen(true)}>
-                  <Clock className="mr-2 h-4 w-4" /> Schedule
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setHighlightOpen(true)}>
-                  <Star className="mr-2 h-4 w-4" /> Highlight
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={handleDelete}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       </Card>
 

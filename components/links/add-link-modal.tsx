@@ -44,9 +44,9 @@ export function AddLinkModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full gap-2 shadow-lg">
+        <button className="w-full py-3 rounded-xl bg-black text-white font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
           <Plus className="h-4 w-4" /> Add Link
-        </Button>
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

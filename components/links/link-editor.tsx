@@ -92,7 +92,7 @@ export function LinkEditor({ initialLinks }: LinkEditorProps) {
         items={links.map(l => l.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-4 pb-20">
+        <div className="space-y-3 pb-20">
           {links.map((link) => (
             <LinkCard key={link.id} link={link} />
           ))}

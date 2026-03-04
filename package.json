@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "rm -f vite.config.ts vite.config.js && next build",
     "start": "next start",
     "lint": "eslint .",
     "clean": "next clean"

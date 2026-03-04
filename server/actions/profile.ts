@@ -20,10 +20,27 @@ export async function updateProfile(input: Partial<ProfileInput>) {
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/admin/settings')
+  revalidatePath('/settings')
   revalidatePath(`/${data.username}`)
   
   return data as Profile
+}
+
+export async function checkUsernameAvailability(username: string) {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('username', username)
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 means no rows returned, which is good (username available)
+    throw new Error(error.message)
+  }
+
+  return !data // true if available, false if taken
 }
 
 export async function getProfile() {
