@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { Theme } from "@/types/theme"
-import { Profile } from "@/types/profile"
 import { revalidatePath } from "next/cache"
 
 export async function getThemes() {
@@ -21,8 +20,7 @@ export async function getThemes() {
 
 export async function updateProfileAppearance(
   themeId: string | null, 
-  customAppearance: Partial<Theme>,
-  profileData?: Partial<Profile>
+  customAppearance: Partial<Theme>
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -33,12 +31,6 @@ export async function updateProfileAppearance(
     theme_id: themeId,
     custom_appearance: customAppearance,
     updated_at: new Date().toISOString()
-  }
-
-  if (profileData) {
-    if (profileData.display_name !== undefined) updateData.display_name = profileData.display_name
-    if (profileData.bio !== undefined) updateData.bio = profileData.bio
-    if (profileData.avatar_url !== undefined) updateData.avatar_url = profileData.avatar_url
   }
 
   const { error } = await supabase

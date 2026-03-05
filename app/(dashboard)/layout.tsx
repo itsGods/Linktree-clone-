@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { ThemeProvider } from "@/context/theme-context"
 
 export default async function DashboardLayout({
   children,
@@ -29,7 +30,7 @@ export default async function DashboardLayout({
   // Check if profile exists, if not redirect to onboarding
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username')
+    .select('username, custom_appearance')
     .eq('id', user.id)
     .single()
 
@@ -37,36 +38,40 @@ export default async function DashboardLayout({
     redirect("/onboarding")
   }
 
+  const initialTheme = profile.custom_appearance || undefined
+
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Mobile Sidebar */}
-      <div className="md:hidden border-b p-4 flex items-center justify-between">
-        <span className="font-bold text-xl">Linktree Clone</span>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <SidebarContent />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex w-64 flex-col border-r bg-gray-50/40">
-        <div className="p-6 border-b">
+    <ThemeProvider initialTheme={initialTheme}>
+      <div className="flex min-h-screen flex-col md:flex-row">
+        {/* Mobile Sidebar */}
+        <div className="md:hidden border-b p-4 flex items-center justify-between">
           <span className="font-bold text-xl">Linktree Clone</span>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-0">
+              <SidebarContent />
+            </SheetContent>
+          </Sheet>
         </div>
-        <SidebarContent />
-      </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6 md:p-8 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex w-64 flex-col border-r bg-gray-50/40">
+          <div className="p-6 border-b">
+            <span className="font-bold text-xl">Linktree Clone</span>
+          </div>
+          <SidebarContent />
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }
 

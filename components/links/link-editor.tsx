@@ -108,7 +108,7 @@ export function LinkEditor({ initialLinks }: LinkEditorProps) {
       {createPortal(
         <DragOverlay dropAnimation={dropAnimation}>
           {activeLink ? (
-            <div className="opacity-90 rotate-2 scale-105 cursor-grabbing">
+            <div className="shadow-lg cursor-grabbing">
                <LinkCard link={activeLink} />
             </div>
           ) : null}

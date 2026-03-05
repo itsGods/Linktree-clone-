@@ -194,7 +194,7 @@ export function LinkCard({ link }: LinkCardProps) {
         className={cn(
           "group relative flex flex-col bg-white transition duration-150",
           "rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md",
-          isDragging && "shadow-xl scale-[1.02] rotate-1 cursor-grabbing"
+          isDragging && "shadow-lg cursor-grabbing"
         )}
       >
         {/* Top Row: drag handle, icon, title, menu button */}
