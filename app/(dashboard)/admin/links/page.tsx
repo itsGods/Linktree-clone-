@@ -33,12 +33,9 @@ export default async function LinksPage() {
 
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-6 gap-8 max-w-7xl mx-auto w-full">
         {/* Editor Column */}
-        <div className="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 pb-20 scrollbar-hide">
-          <div className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 py-2 space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">Links</h1>
-            <AddLinkModal />
-          </div>
-          
+        <div className="flex-1 flex flex-col space-y-6 overflow-y-auto pr-2 pb-20 scrollbar-hide">
+          <h1 className="text-2xl font-bold text-gray-900">Links</h1>
+          <AddLinkModal />
           <LinkEditor initialLinks={links} />
         </div>
 

@@ -23,8 +23,6 @@ import {
 import { Link } from "@/types/links"
 import { useLinkEditorStore } from "@/store/linkEditorStore"
 import { duplicateLink } from "@/server/actions/links" // Keep duplicate as server action for now or move to store? Store is better.
-import { ScheduleModal } from "./schedule-modal"
-import { HighlightModal } from "./highlight-modal"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
@@ -43,9 +41,6 @@ export function LinkCard({ link }: LinkCardProps) {
   const [url, setUrl] = useState(link.url || "")
   const [isSaving, setIsSaving] = useState(false)
   const [urlError, setUrlError] = useState<string | null>(null)
-
-  const [scheduleOpen, setScheduleOpen] = useState(false)
-  const [highlightOpen, setHighlightOpen] = useState(false)
 
   const titleInputRef = useRef<HTMLInputElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
@@ -305,19 +300,10 @@ export function LinkCard({ link }: LinkCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => { setIsEditingTitle(true); setTimeout(() => titleInputRef.current?.focus(), 0) }}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit Title
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setIsEditingUrl(true); setTimeout(() => urlInputRef.current?.focus(), 0) }}>
-                <Pencil className="mr-2 h-4 w-4" /> Edit URL
+                <Pencil className="mr-2 h-4 w-4" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDuplicate}>
                 <Copy className="mr-2 h-4 w-4" /> Duplicate
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setScheduleOpen(true)}>
-                <Clock className="mr-2 h-4 w-4" /> Schedule
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setHighlightOpen(true)}>
-                <Star className="mr-2 h-4 w-4" /> Highlight
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={handleDelete}>
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -331,8 +317,8 @@ export function LinkCard({ link }: LinkCardProps) {
           {/* Left side: click count & badges */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-              <span className="w-2 h-2 rounded-full bg-green-500/20 border border-green-500/50"></span>
-              <span>{link.click_count} clicks</span>
+              <span className="text-[10px]">●</span>
+              <span>{link.click_count} click{link.click_count !== 1 ? 's' : ''}</span>
             </div>
             
             {isScheduled && (
@@ -358,18 +344,6 @@ export function LinkCard({ link }: LinkCardProps) {
           />
         </div>
       </Card>
-
-      <ScheduleModal 
-        link={link} 
-        open={scheduleOpen} 
-        onOpenChange={setScheduleOpen} 
-      />
-      
-      <HighlightModal 
-        link={link} 
-        open={highlightOpen} 
-        onOpenChange={setHighlightOpen} 
-      />
     </>
   )
 }
