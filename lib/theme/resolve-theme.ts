@@ -1,100 +1,81 @@
-import { Theme } from "@/types/theme"
-
-export const DEFAULT_THEME: Theme = {
-  id: 'default',
-  name: 'Clean White',
-  is_premium: false,
-  is_system: true,
-  background_type: 'solid',
-  background_value: '#ffffff',
-  gradient_start: null,
-  gradient_end: null,
-  gradient_direction: null,
-  background_image_url: null,
-  background_video_url: null,
-  card_style: 'soft_shadow',
-  card_color: '#ffffff',
-  card_text_color: '#000000',
-  card_border_radius: 'md',
-  card_shadow_color: 'rgba(0,0,0,0.1)',
-  font_family: 'Inter',
-  font_color: '#000000',
-  profile_title_color: '#000000',
-  bio_color: '#666666',
-  button_hover_animation: 'scale',
-  social_icon_style: 'filled',
-  avatar_shape: 'circle',
-  hide_branding: false,
-  custom_css: null,
-  created_at: new Date().toISOString()
-}
+import { ThemeState, defaultTheme } from "@/context/theme-context"
 
 export function resolveTheme(
-  baseTheme: Theme | null,
-  customAppearance: Partial<Theme> | null
-): Theme {
+  customAppearance: Partial<ThemeState> | string | null
+): ThemeState {
   // Start with default
-  let resolved = { ...DEFAULT_THEME }
-
-  // Apply base theme if exists
-  if (baseTheme) {
-    resolved = { ...resolved, ...baseTheme }
-  }
+  let resolved = { ...defaultTheme }
 
   // Apply custom overrides
   if (customAppearance) {
-    // Filter out null/undefined values from customAppearance to avoid overwriting with empty
-    const cleanOverrides = Object.fromEntries(
-      Object.entries(customAppearance).filter(([_, v]) => v !== null && v !== undefined)
-    )
-    resolved = { ...resolved, ...cleanOverrides }
+    let parsedAppearance = customAppearance
+    if (typeof customAppearance === 'string') {
+      try {
+        parsedAppearance = JSON.parse(customAppearance)
+      } catch (e) {
+        parsedAppearance = {}
+      }
+    }
+
+    if (typeof parsedAppearance === 'object' && parsedAppearance !== null) {
+      // Filter out null/undefined values from customAppearance to avoid overwriting with empty
+      const cleanOverrides = Object.fromEntries(
+        Object.entries(parsedAppearance).filter(([_, v]) => v !== null && v !== undefined)
+      )
+      resolved = { ...resolved, ...cleanOverrides }
+    }
   }
 
   return resolved
 }
 
-export function generateThemeCSS(theme: Theme): React.CSSProperties {
-  const css: any = {
-    '--bg-value': theme.background_value,
-    '--card-bg': theme.card_color,
-    '--card-text': theme.card_text_color,
-    '--card-shadow': theme.card_shadow_color,
-    '--font-color': theme.font_color,
-    '--title-color': theme.profile_title_color,
-    '--bio-color': theme.bio_color,
-  }
+export function generateThemeCSS(theme: ThemeState): React.CSSProperties {
+  const css: any = {}
 
   // Handle Background
-  if (theme.background_type === 'solid') {
-    css['--bg'] = theme.background_value
-  } else if (theme.background_type === 'gradient') {
-    css['--bg'] = `linear-gradient(${theme.gradient_direction || 'to bottom'}, ${theme.gradient_start}, ${theme.gradient_end})`
-  } else if (theme.background_type === 'image') {
-    css['--bg'] = `url(${theme.background_image_url}) center/cover no-repeat fixed`
+  if (theme.backgroundType === 'color') {
+    css['--bg'] = theme.backgroundColor
+  } else if (theme.backgroundType === 'gradient') {
+    css['--bg'] = theme.backgroundGradient
+  } else if (theme.backgroundType === 'image') {
+    css['--bg'] = `url(${theme.backgroundImage}) center/cover no-repeat fixed`
   }
 
-  // Handle Radius
-  const radiusMap: Record<string, string> = {
-    'none': '0px',
-    'sm': '4px',
-    'md': '8px',
-    'lg': '16px',
-    'full': '9999px'
+  // Handle Button Style
+  css['--card-radius'] = `${theme.buttonRadius}px`
+  
+  if (theme.buttonStyle === 'outline') {
+    css['--card-bg'] = 'transparent'
+    css['--card-border'] = `2px solid ${theme.buttonColor}`
+    css['--card-text'] = theme.buttonColor
+  } else if (theme.buttonStyle === 'soft') {
+    css['--card-bg'] = theme.buttonColor
+    css['--card-opacity'] = '0.8'
+    css['--card-text'] = '#ffffff'
+  } else if (theme.buttonStyle === 'hard') {
+    css['--card-bg'] = theme.buttonColor
+    css['--card-shadow'] = '4px 4px 0px 0px #000000'
+    css['--card-text'] = '#ffffff'
+  } else {
+    // fill
+    css['--card-bg'] = theme.buttonColor
+    css['--card-text'] = '#ffffff'
   }
-  css['--card-radius'] = radiusMap[theme.card_border_radius || 'md']
 
-  // Handle Font Family (This maps to the CSS variable provided by next/font)
+  // Handle Font Family
   const fontMap: Record<string, string> = {
-    'Inter': 'var(--font-inter)',
-    'Poppins': 'var(--font-poppins)',
-    'DM Sans': 'var(--font-dm-sans)',
-    'Space Grotesk': 'var(--font-space-grotesk)',
-    'Outfit': 'var(--font-outfit)',
-    'Plus Jakarta Sans': 'var(--font-plus-jakarta)',
-    'Playfair Display': 'var(--font-playfair)',
-    'Montserrat': 'var(--font-montserrat)',
+    'modern': 'var(--font-sans)',
+    'rounded': 'var(--font-sans)',
+    'minimal': 'var(--font-mono)',
+    'serif': 'var(--font-serif)',
   }
-  css['--font-family'] = fontMap[theme.font_family || 'Inter'] || 'sans-serif'
+  css['--font-family'] = fontMap[theme.fontFamily || 'modern'] || 'sans-serif'
+  
+  // Font Color based on background
+  const isDarkBg = theme.backgroundType === 'color' && theme.backgroundColor === '#0f0f0f'
+  css['--font-color'] = isDarkBg ? '#ffffff' : '#111827'
+  css['--title-color'] = isDarkBg ? '#ffffff' : '#111827'
+  css['--bio-color'] = isDarkBg ? 'rgba(255,255,255,0.8)' : 'rgba(17,24,39,0.8)'
 
   return css as React.CSSProperties
 }

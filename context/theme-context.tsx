@@ -15,6 +15,8 @@ export interface ThemeState {
   fontFamily: "modern" | "rounded" | "minimal" | "serif"
   layoutStyle: "center" | "wide" | "compact"
   animationStyle: "fade" | "slide" | "bounce" | "none"
+  avatarShape: "circle" | "rounded" | "square"
+  hideBranding: boolean
 }
 
 export const defaultTheme: ThemeState = {
@@ -28,7 +30,9 @@ export const defaultTheme: ThemeState = {
   buttonColor: "#000000",
   fontFamily: "modern",
   layoutStyle: "center",
-  animationStyle: "fade"
+  animationStyle: "fade",
+  avatarShape: "circle",
+  hideBranding: false
 }
 
 export const themes: ThemeState[] = [
@@ -70,11 +74,21 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children, initialTheme }: { children: React.ReactNode, initialTheme?: Partial<ThemeState> }) {
-  const [theme, setThemeState] = useState<ThemeState>({ ...defaultTheme, ...initialTheme })
+  let parsedInitialTheme = initialTheme
+  if (typeof initialTheme === 'string') {
+    try {
+      parsedInitialTheme = JSON.parse(initialTheme)
+    } catch (e) {
+      parsedInitialTheme = {}
+    }
+  }
+
+  const [theme, setThemeState] = useState<ThemeState>({ ...defaultTheme, ...parsedInitialTheme })
   const [isSaving, setIsSaving] = useState(false)
   const supabase = createClient()
 
   const setTheme = (newTheme: ThemeState) => {
+    console.log("Setting new theme:", newTheme)
     setThemeState(newTheme)
   }
 

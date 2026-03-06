@@ -5,6 +5,7 @@ import { LinkRenderer } from "@/components/links/renderers"
 import { motion, AnimatePresence } from "motion/react"
 import { Phone } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useTheme } from "@/context/theme-context"
 
 interface MobilePreviewProps {
   user: {
@@ -17,6 +18,9 @@ interface MobilePreviewProps {
 
 export function MobilePreview({ user }: MobilePreviewProps) {
   const links = useLinkEditorStore((state) => state.links)
+  
+  // Get theme from context (assuming MobilePreview is always inside ThemeProvider in admin)
+  const { theme } = useTheme()
 
   // Filter active links for preview (or show all with opacity if inactive? usually preview shows what public sees)
   // The prompt says "Render actual public link components". Public only sees active links.
@@ -62,7 +66,7 @@ export function MobilePreview({ user }: MobilePreviewProps) {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <LinkRenderer link={link} />
+                    <LinkRenderer link={link} theme={theme} />
                   </motion.div>
                 ))}
               </AnimatePresence>

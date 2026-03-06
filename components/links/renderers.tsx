@@ -4,6 +4,7 @@ import { Link } from "@/types/links"
 import { motion } from "motion/react"
 import { ExternalLink } from "lucide-react"
 import Image from "next/image"
+import { ThemeState } from "@/context/theme-context"
 
 // --- Renderers ---
 
@@ -34,7 +35,9 @@ const ClassicLink = ({ link }: { link: Link }) => {
           backgroundColor: 'var(--card-bg, #ffffff)',
           color: 'var(--card-text, #000000)',
           borderRadius: 'var(--card-radius, 8px)',
-          border: '1px solid rgba(0,0,0,0.1)' // Optional: make this variable too
+          border: 'var(--card-border, 1px solid rgba(0,0,0,0.1))',
+          boxShadow: 'var(--card-shadow, none)',
+          opacity: 'var(--card-opacity, 1)'
         }}
       >
         {link.thumbnail_url && (
@@ -86,7 +89,7 @@ const linkRenderers: Record<string, React.ComponentType<{ link: Link }>> = {
 
 // --- Main Component ---
 
-export function LinkRenderer({ link, style, index = 0 }: { link: Link; style?: React.CSSProperties; index?: number }) {
+export function LinkRenderer({ link, style, index = 0, theme }: { link: Link; style?: React.CSSProperties; index?: number; theme?: ThemeState }) {
   const Renderer = linkRenderers[link.type] || ClassicLink
 
   const getAnimation = () => {
@@ -100,12 +103,25 @@ export function LinkRenderer({ link, style, index = 0 }: { link: Link; style?: R
     }
   }
 
+  const getHoverAnimation = () => {
+    if (link.is_highlighted) return {}
+    if (!theme) return { scale: 1.02 }
+
+    switch (theme.animationStyle) {
+      case 'slide': return { x: 8 }
+      case 'bounce': return { y: -4 }
+      case 'fade': return { opacity: 0.8 }
+      case 'none': return {}
+      default: return { scale: 1.02 }
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
-      whileHover={link.is_highlighted ? {} : { scale: 1.02 }}
+      whileHover={getHoverAnimation()}
       whileTap={{ scale: 0.98 }}
       className="w-full max-w-md mb-4"
       style={style}

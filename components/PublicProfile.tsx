@@ -57,7 +57,7 @@ export function PublicProfile({ profile, links, isPreview = false }: PublicProfi
 
         <div className="w-full space-y-4 flex flex-col items-center px-4">
           {links.map((link, index) => (
-            <LinkRenderer key={link.id} link={link} index={index} />
+            <LinkRenderer key={link.id} link={link} index={index} theme={theme} />
           ))}
           
           {links.length === 0 && (

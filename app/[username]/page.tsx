@@ -72,8 +72,7 @@ export default async function UserProfilePage({
 
   // Resolve Theme
   const theme = resolveTheme(
-    profile.themes as unknown as Theme | null,
-    profile.custom_appearance as Partial<Theme> | null
+    profile.custom_appearance as any
   )
   const themeCSS = generateThemeCSS(theme)
 
@@ -93,7 +92,7 @@ export default async function UserProfilePage({
         <div className="w-full max-w-md space-y-8 flex flex-col items-center z-10">
           <div className="flex flex-col items-center space-y-4 text-center w-full">
             <Avatar 
-              className={`h-24 w-24 border-2 border-white shadow-md ${theme.avatar_shape === 'square' ? 'rounded-none' : theme.avatar_shape === 'rounded' ? 'rounded-xl' : 'rounded-full'}`}
+              className={`h-24 w-24 border-2 border-white shadow-md ${theme.avatarShape === 'square' ? 'rounded-none' : theme.avatarShape === 'rounded' ? 'rounded-xl' : 'rounded-full'}`}
             >
               <AvatarImage src={profile.avatar_url || undefined} alt={profile.username} />
               <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
@@ -110,7 +109,7 @@ export default async function UserProfilePage({
 
           <div className="w-full space-y-4 flex flex-col items-center px-4">
             {links.map((link, index) => (
-              <LinkRenderer key={link.id} link={link} index={index} />
+              <LinkRenderer key={link.id} link={link} index={index} theme={theme} />
             ))}
             
             {links.length === 0 && (
@@ -120,7 +119,7 @@ export default async function UserProfilePage({
             )}
           </div>
           
-          {!theme.hide_branding && (
+          {!theme.hideBranding && (
             <div className="mt-12 pb-20">
               <Link href="/" className="text-xs hover:underline font-medium opacity-50 hover:opacity-100 transition-opacity">
                 Linktree Clone
